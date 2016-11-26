@@ -1,22 +1,44 @@
 
 /*
-
-Single channel temperature data logging and display application.
-
-Datalogger_Temperature.ino
+  Program to do long-term temperature data logging of outdoor temperature. Datalogger_BaseCode_Temperature v3.
+  v3 - designed to work through the Grove interface (code assembly with logger components, verify stability and comparative readings of T sensor).
+  v4 - minor modifications to eliminate the Grove physical interface.
+  
+  This program is adapted from the basis for an application for data logging and test control: Datalogger_BaseCode
+  Examples:   Temperature logging (one or two temperatures)
+              Battery discharge test monitoring voltage vs time, with  shut-off and test complete alarm.
+ Datalogger_BaseCode.ino
  Created 30 April 2016
  by Alan Hutchenreuther
 
-Hardware configuration for base system:
-  Arduino Uno R3
-  Grove modular connector shield.
-  Grove LCD
-  ChronoDot RTC board.
-  Adafruit MicroSD breakout board.
+Log interval:  5 minutes:
+Data record:  Date/ 24-hour Time/ Log duration (seconds)/ Temperature (degF)
+Data storage:  2GB microSD
+Data capacity:  months or longer.
 
-Hardware configuration for specific application:
-1 DS18B20 temperature sensor(s)
+Hardware configuration for base system (v2 & v3 code):
+Arduino Uno R3
+Grove modular connector shield.
+Grove LCD
+ChronoDot RTC board.
+Adafruit MicroSD breakout board.
 
+Hardware configuration for target system:
+Arduino Uno R3 (Inland clone)
+SoarkFun protoshield with MicroSD feature.  (SPI interface to MicroSD)
+Standard LCD with I2C interface through Spikenzie I2C port expander 
+  (Spikenzie_RGBLCDshield library, adapted from Adafruit_RGBLCDshield but without buttons.))
+ChronoDot RTC board. (I2C interface)
+Yellow LED to indicate status: log (.5 sec blink) or error (solid ON).
+1 DS18B20 temperature sensor( OneWire interface, pin D3)
+To supply power, a 9V AC adapter with 20' extension and in-line powewr switch to be provided.
+
+The target system is to replace the original data logger coded in:
+TemperatureDisplay_V8_3_DigitalTempTimeLoggingRTC, without a LCD display.   Original hardware uses:
+Arduino UNO R3 board with prototype breadboard (from Arduino Experimenter's kit.)
+High Temperature DS18B20 temperature sensor,
+SparkFun protoshield with MicroSD feature.  (SPI interface to MicroSD)
+Yellow LED to indicate status.
 
 Operating Note:  When swapping out microSD cards, remove power.   Failure to do so will
 prevent future logging to continue without error indication.
@@ -119,7 +141,7 @@ void setup() {
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows
   lcd.clear();
   //         1234567890123456
-  lcd.print("  LOGGER V1.0 ");
+  lcd.print("  LOGGER v3 ");
   lcd.setCursor(0,1);
   lcd.print(str);
   delay(5000);
