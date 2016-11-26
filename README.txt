@@ -1,13 +1,27 @@
-This repository contains a number of data logging and control application tools for my personal use. There are similar applications derived from and listed in the Datalogger_BaseCode project found in my GitHub account. 
+This lists a family of projects related to datalogging and control of temperature.
+Many of these sketches are derived from the Datalogger_BaseCode project while others are predecessors.
 
-The applications run on the Arduino Uno R3 with the support of a number of libraries found on www.Arduino.org or distributors (Adafruit, Spark Fun, etc.) websites.
+* Datalogger_BaseCode\   Uses Grove hardware for prototyping
 
-I place this on GitHub mainly as a way to experiment with versioning and synching projects between multiple computers for personal use.   If you happen to have stumbled on this repository you have my condolences.  If you find something of interest here, the license statement below should apply.  
+* Battery Life
+Datalogger_BaseCode_BatteryLife\
 
-License
+* Stationary long term temperature logger
+Datalogger_BaseCode_Temperature\   Grove prototype for temperature.
+	Datalogger_v3\    Grove prototype, long term temperature logger application.
+		Datalogger_v5\    Stationary temperature logger (garage). Display TOD & Temp.  Unique hardware.
 
-This application is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+* Portable long term temperature logger		
+TemperatureDisplay_V8_3\ Portable temperature logger. Display TOD, Temp, max & min temp.  Unique hardware. 
 
-This application is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+* YogurtMakerControl_MSP430 - First application.  Uses TI MSP430 LaunchPad boards.  Lower cost and on-hand.
 
-You should have received a copy of the GNU Lesser General Public License along with this program, if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+Early Development
+GroveLogger_V1_0_DualDigitalTempTime\
+Datalogger_Logger_v1     Prototype logger based on Grove hardware.
+
+Archives:
+TemperatureDisplay_V8_1_DigitalTempTimeLoggingRTC\
+TemperatureDisplay_V8_2_DigitalTempTimeLoggingRTC\
+
+* - Versioning in effect with Git
