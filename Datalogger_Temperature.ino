@@ -1,25 +1,58 @@
 
 /*
-
-Single channel temperature data logging and display application.
-
-Datalogger_Temperature.ino
+  Program to do long-term temperature data logging of outdoor temperature. 
+  From Datalogger_BaseCode_Temperature v3.
+  v3 - designed to work through the Grove interface (code assembly with logger components, verify stability and comparative readings of T sensor).
+  v4 - minor modifications to eliminate the Grove physical interface.
+  
+  This program is adapted from the basis for an application for data logging and test control: Datalogger_BaseCode
+  Examples:   Temperature logging (one or two temperatures)
+              Battery discharge test monitoring voltage vs time, with  shut-off and test complete alarm.
+ Datalogger_BaseCode.ino
  Created 30 April 2016
  by Alan Hutchenreuther
 
-Hardware configuration for base system:
-  Arduino Uno R3
-  Grove modular connector shield.
-  Grove LCD
-  ChronoDot RTC board.
-  Adafruit MicroSD breakout board.
+Log interval:  5 minutes:
+Data record:  Date/ 24-hour Time/ Log duration (seconds)/ Temperature (degF)
+Data storage:  2GB microSD
+Data capacity:  months or longer.
 
-Hardware configuration for specific application:
-1 DS18B20 temperature sensor(s)
+Hardware configuration for base system (v2 & v3 code):
+Arduino Uno R3
+Grove modular connector shield.
+Grove LCD
+ChronoDot RTC board.
+Adafruit MicroSD breakout board.
 
+Hardware configuration for target system:
+Arduino Uno R3 (Inland clone)
+SoarkFun protoshield with MicroSD feature.  (SPI interface to MicroSD)
+Standard LCD with I2C interface through Spikenzie I2C port expander 
+  (Spikenzie_RGBLCDshield library, adapted from Adafruit_RGBLCDshield but without buttons.))
+ChronoDot RTC board. (I2C interface)
+Yellow LED to indicate status: log (.5 sec blink) or error (solid ON).
+1 DS18B20 temperature sensor( OneWire interface, pin D3)
+To supply power, a 9V AC adapter with 20' extension and in-line powewr switch to be provided.
+
+The target system is to replace the original data logger coded in:
+TemperatureDisplay_V8_3_DigitalTempTimeLoggingRTC, without a LCD display.   Original hardware uses:
+Arduino UNO R3 board with prototype breadboard (from Arduino Starter kit.)
+High Temperature DS18B20 temperature sensor,
+SparkFun protoshield with MicroSD feature.  (SPI interface to MicroSD)
+Yellow LED to indicate status.
 
 Operating Note:  When swapping out microSD cards, remove power.   Failure to do so will
 prevent future logging to continue without error indication.
+
+Code changes:
+20160607 - Version v4
+Replace Grove LCD libraries with Adafruit/Spikenzie libraries.   Instantiate object 'lcd' with new library.
+Add "Log" message to LCD display when logging takes place.
+20160610 - Version v5
+Remove lcd.clear(1) to reduce blinking 
+Reduce sig-figs on temperature display.
+Set microSD CS pin to 8 instead of 10, for SparkFun shield.
+Verify Hardware jumpers present for I2C:  SJ1 & SJ2 jumpers present. microSD_Shield_v14.pdf
 
 */
 
@@ -35,8 +68,10 @@ prevent future logging to continue without error indication.
 #include <TimeLib.h>  //??
 #include <DS1307RTC.h>
 #include <OneWire.h>  // For communication with the DS18B20 temperature sensor.
-#include <LiquidCrystal.h>  // For LCD
-#include <rgb_lcd.h>   // Extension for Grove LCD
+#include <Spikenzie_RGBLCDShield.h>  //    For Adafruit/Spikenzie LCD
+#include <utility/Spikenzie_MCP23017.h>
+//#include <LiquidCrystal.h>  // For LCD   For Grove LCD
+//#include <rgb_lcd.h>   // Extension for Grove LCD
 #include <SPI.h>   // For microSD
 #include <SD.h>
 #include <PString.h> //  http://arduiniana.org/libraries/PString/
@@ -56,7 +91,8 @@ prevent future logging to continue without error indication.
 boolean debugging = true;
 
 // LCD display
-rgb_lcd lcd;
+//rgb_lcd lcd;   For Grove LCD
+Spikenzie_RGBLCDShield lcd = Spikenzie_RGBLCDShield();
 
 // Time
 tmElements_t tm;  // important structure defined in Time library.
@@ -73,7 +109,7 @@ int lastLoopSecond;
 boolean startPass = true;
 boolean logNewPoint = true;
 
-const int SD_CS_Pin = 10;
+const int SD_CS_Pin = 8;  // SparkFun microSD CS pin.   Most other shields CS=10;
 
 //**************************************************************************/
 //     Application specific variables.
@@ -119,7 +155,7 @@ void setup() {
   lcd.begin(16, 2);  // set up the LCD's number of columns and rows
   lcd.clear();
   //         1234567890123456
-  lcd.print("  LOGGER V1.0 ");
+  lcd.print("  LOGGER v5 ");
   lcd.setCursor(0,1);
   lcd.print(str);
   delay(5000);
@@ -149,10 +185,12 @@ void loop() {
   thisTempF = ((temperature * 9.0) / 5.0) + 32.0; // Convert temperature to Fahrenheit
 
   // Update LCD
-  clearLine(1);
+  //clearLine(1);
+  lcd.setCursor( 0, 0);
   displayTOD(tm);
+  lcd.print("  ");
+  lcd.print( thisTempF,1);
   clearLine(2);
-  lcd.print( thisTempF);
 
   // Determine if a new point is to be logged.  
   if (lastLoopSecond > tm.Second ) {  // look for rollover of seconds
@@ -177,7 +215,7 @@ void loop() {
     logStr.print((( tm.Minute<10)?":0":":")); logStr.print(int(tm.Minute));
     logStr.print((( tm.Second<10)?":0":":")); logStr.print(int(tm.Second));
     logStr.print(",  ");
-    logStr.print(logDuration);
+    logStr.print(logDuration);  // minutes since start
     logStr.print(",  ");
     logStr.print( thisTempF,1);
     
@@ -189,12 +227,13 @@ void loop() {
       Serial.println( logBuffer);
       dataFile.flush();
       dataFile.close();
+      lcd.print(" Log");
     }
     else {
       Serial.println( "Error opening log file.");
       // Show status on lcd.
       clearLine(2);
-      lcd.print( "Error");
+      lcd.print( "Log Error");
     }
   }
     
